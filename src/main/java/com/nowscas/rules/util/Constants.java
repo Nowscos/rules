@@ -62,6 +62,7 @@ public final class Constants {
 
     public static final String REGISTRATION_CONTINUES_MESSAGE = "Вы уже начали регистрацию! Выберите группировку.";
     public static final String TESTING_IS_FINISHED_MESSAGE = "Вы уже сдали правила для предстоящей игры!";
+    public static final String TESTING_IS_RUNNING = "Вы уже в процессе тестирования! Завершите его.";
     public static final String INVALID_COMMAND_ERROR = "Команда не поддерживается!";
     public static final String INVALID_FILE_UPLOAD_ERROR = "Отправка файлов не поддерживается!";
     public static final String SEND_MESSAGE_EXCEPTION = "Ошибка отправки сообщения в чат: %d";

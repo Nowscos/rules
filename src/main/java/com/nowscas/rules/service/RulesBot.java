@@ -55,6 +55,7 @@ import static com.nowscas.rules.util.Constants.TESTING;
 import static com.nowscas.rules.util.Constants.TESTING_CONTINUE_BUTTON;
 import static com.nowscas.rules.util.Constants.TESTING_EXIT_BUTTON;
 import static com.nowscas.rules.util.Constants.TESTING_IS_FINISHED_MESSAGE;
+import static com.nowscas.rules.util.Constants.TESTING_IS_RUNNING;
 import static com.nowscas.rules.util.Constants.TESTING_OFFER_RUS;
 
 @Slf4j
@@ -117,6 +118,8 @@ public class RulesBot extends TelegramLongPollingBot {
                                 sendAuthMessage(chatId, stalkerByChatId);
                             } else if (FINISH_TEST.equals(stalkerByChatId.getState())) {
                                 sendMessage(chatId, TESTING_IS_FINISHED_MESSAGE, null);
+                            } else if (TESTING.equals(stalkerByChatId.getState())) {
+                                sendMessage(chatId, TESTING_IS_RUNNING, null);
                             }
                         } catch (StalkerException e) {
                             sendRegisterMessage(chatId);
