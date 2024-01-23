@@ -1,0 +1,22 @@
+app:
+  bot:
+    name: SszRulesBot
+    token: 6878454405:AAFFDLATLLdYPHlmXyeyzMuP0_wScRlxDGk
+    admins: 782243896
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/rules?currentSchema=rules
+    username: postgres
+    password: postgres
+    hikari:
+      data-source-properties:
+        useUnicode: true
+        characterEncoding: UTF-8
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog.yaml
+    default-schema: rules
+
+preliquibase:
+  sqlScriptReferences: classpath:db/changelog/schema/SCHEMA.sql
+  enabled: false
