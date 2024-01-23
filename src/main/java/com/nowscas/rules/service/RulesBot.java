@@ -65,6 +65,8 @@ public class RulesBot extends TelegramLongPollingBot {
 
     @Value("${app.bot.admins}")
     private List<Long> admins;
+    @Value("${app.bot.wrong-answers}")
+    private Integer wrongAnswers;
 
     private final BotProperties botProperties;
     private final StalkerService stalkerService;

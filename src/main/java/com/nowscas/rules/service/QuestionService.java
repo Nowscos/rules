@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -28,6 +29,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
+
+    @Value("${app.bot.limit-answers}")
+    private Integer limitAnswers;
 
     private final StalkerRepository stalkerRepository;
     private final QuestionRepository questionRepository;
@@ -86,7 +90,7 @@ public class QuestionService {
             stalker.setCurrentAnswers(stalker.getCurrentAnswers() + 1);
         }
         List<String> ids = Arrays.asList(stalker.getPassedQuestions());
-        return ids.size() < 3;
+        return ids.size() < limitAnswers;
     }
 
     // Заполнение списка вопросов
