@@ -3,7 +3,7 @@ app:
     name: SszRulesBot
     token: 6878454405:AAFFDLATLLdYPHlmXyeyzMuP0_wScRlxDGk
     admins: 782243896
-    wrong-answers: 2
+    right-answers: 3
     limit-answers: 5
 
 spring:

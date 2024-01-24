@@ -5,6 +5,15 @@ import java.util.Map;
 
 public final class Constants {
 
+    public static final String START_COMMAND = "/start";
+    public static final String HELP_COMMAND = "/help";
+    public static final String MY_INFO_COMMAND = "/info";
+    public static final String DELETE_MYSELF_TEMPORARY_COMMAND = "/deleteMyself";
+
+    public static final String CLOSE_TESTING_ADMIN_COMMAND = "/closeTesting";
+    public static final String OPEN_TESTING_ADMIN_COMMAND = "/openTesting";
+    public static final String DOWNLOAD_RESULTS_ADMIN_COMMAND = "/downloadResults";
+
     public static final String STALKER_STATE_NEW = "NEW";
     public static final String STALKER_STATE_WAIT_FOR_GROUP = "WAIT_FOR_GROUP";
     public static final String STALKER_STATE_FILLED = "FILLED";
@@ -67,9 +76,20 @@ public final class Constants {
     public static final String INVALID_FILE_UPLOAD_ERROR = "Отправка файлов не поддерживается!";
     public static final String SEND_MESSAGE_EXCEPTION = "Ошибка отправки сообщения в чат: %d";
     public static final String SEND_EDIT_MESSAGE_EXCEPTION = "Ошибка отправки Edit сообщения в чат: %d";
+    public static final String SET_MENU_EXCEPTION = "Ошибка создания меню";
 
     public static final String RESULT = "result";
     public static final String FILE_PATH = "file_path";
+
+    public static final String START_BUTTON_TEXT = "Начать работу";
+    public static final String HELP_BUTTON_TEXT = "Помощь";
+    public static final String MY_INFO_BUTTON_TEXT = "Моя информация";
+    public static final String HELP_TEXT = "Данный бот предназначен для сдачи правил на проекте Сталкер Северо-Запад\n\n" +
+            "Вы можете выполнить следующие команды:\n" +
+            "/start для регистрации и тестирования\n" +
+            "/help для просмотра доступых команд\n" +
+            "/info для просмотра своих результатов\n" +
+            "/deleteMyself временная команда для удаления своей записи во время тестирования";
 
     public static Map<String, String> getGroupsNameMap() {
         Map<String, String> groupsNameMap = new HashMap<>();

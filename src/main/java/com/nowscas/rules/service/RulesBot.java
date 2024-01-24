@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nowscas.rules.config.BotProperties;
 import com.nowscas.rules.exception.StalkerException;
 import com.nowscas.rules.model.StalkerEntity;
+import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -23,20 +25,32 @@ import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
+import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import static com.nowscas.rules.util.Constants.ALREADY_REGISTERED_RUS;
 import static com.nowscas.rules.util.Constants.BAD_TESTING_MESSAGE;
 import static com.nowscas.rules.util.Constants.CHOOSE_YOUR_GROUP_RUS;
+import static com.nowscas.rules.util.Constants.CLOSE_TESTING_ADMIN_COMMAND;
+import static com.nowscas.rules.util.Constants.DELETE_MYSELF_TEMPORARY_COMMAND;
+import static com.nowscas.rules.util.Constants.DOWNLOAD_RESULTS_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.FILE_PATH;
 import static com.nowscas.rules.util.Constants.FINISH_TEST;
+import static com.nowscas.rules.util.Constants.HELP_BUTTON_TEXT;
+import static com.nowscas.rules.util.Constants.HELP_COMMAND;
+import static com.nowscas.rules.util.Constants.HELP_TEXT;
 import static com.nowscas.rules.util.Constants.INVALID_COMMAND_ERROR;
 import static com.nowscas.rules.util.Constants.INVALID_FILE_UPLOAD_ERROR;
+import static com.nowscas.rules.util.Constants.MY_INFO_BUTTON_TEXT;
+import static com.nowscas.rules.util.Constants.MY_INFO_COMMAND;
+import static com.nowscas.rules.util.Constants.OPEN_TESTING_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.QUESTIONS_NOT_EXIST;
 import static com.nowscas.rules.util.Constants.QUESTION_UPDATED;
 import static com.nowscas.rules.util.Constants.REGISTER_CONTINUE_BUTTON;
@@ -47,9 +61,12 @@ import static com.nowscas.rules.util.Constants.REGISTRATION_CONTINUES_MESSAGE;
 import static com.nowscas.rules.util.Constants.RESULT;
 import static com.nowscas.rules.util.Constants.SEND_EDIT_MESSAGE_EXCEPTION;
 import static com.nowscas.rules.util.Constants.SEND_MESSAGE_EXCEPTION;
+import static com.nowscas.rules.util.Constants.SET_MENU_EXCEPTION;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_FILLED;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_NEW;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_WAIT_FOR_GROUP;
+import static com.nowscas.rules.util.Constants.START_BUTTON_TEXT;
+import static com.nowscas.rules.util.Constants.START_COMMAND;
 import static com.nowscas.rules.util.Constants.SUCCESS_TESTING_MESSAGE;
 import static com.nowscas.rules.util.Constants.TESTING;
 import static com.nowscas.rules.util.Constants.TESTING_CONTINUE_BUTTON;
@@ -65,8 +82,8 @@ public class RulesBot extends TelegramLongPollingBot {
 
     @Value("${app.bot.admins}")
     private List<Long> admins;
-    @Value("${app.bot.wrong-answers}")
-    private Integer wrongAnswers;
+    @Value("${app.bot.right-answers}")
+    private Integer rightAnswers;
 
     private final BotProperties botProperties;
     private final StalkerService stalkerService;
@@ -83,6 +100,21 @@ public class RulesBot extends TelegramLongPollingBot {
     @Override
     public String getBotToken() {
         return botProperties.getToken();
+    }
+
+    @PostConstruct
+    public void init() {
+        List<BotCommand> listOfCommands = new ArrayList<>();
+        listOfCommands.add(new BotCommand(START_COMMAND, START_BUTTON_TEXT));
+        listOfCommands.add(new BotCommand(HELP_COMMAND, HELP_BUTTON_TEXT));
+        listOfCommands.add(new BotCommand(MY_INFO_COMMAND, MY_INFO_BUTTON_TEXT));
+        try {
+            this.execute(new SetMyCommands(listOfCommands, new BotCommandScopeDefault(), null));
+        } catch (TelegramApiException e) {
+            log.info(SET_MENU_EXCEPTION);
+            log.info(e.getMessage());
+        }
+
     }
 
     @SneakyThrows
@@ -111,7 +143,7 @@ public class RulesBot extends TelegramLongPollingBot {
                 }
 
                 switch (messageText) {
-                    case "/start":
+                    case START_COMMAND:
                         try {
                             StalkerEntity stalkerByChatId = stalkerService.getStalkerByChatId(chatId);
                             if (STALKER_STATE_WAIT_FOR_GROUP.equals(stalkerByChatId.getState())) {
@@ -127,13 +159,15 @@ public class RulesBot extends TelegramLongPollingBot {
                             sendRegisterMessage(chatId);
                         }
                         break;
-                    case "/fillQuestions":
-                        if (admins.contains(chatId)) {
-                            sendMessage(chatId, QUESTION_UPDATED, null);
-                            break;
-                        } else {
-                            sendMessage(chatId, INVALID_COMMAND_ERROR, null);
-                        }
+                    case HELP_COMMAND:
+                        sendMessage(chatId, HELP_TEXT, null);
+                        break;
+                    case MY_INFO_COMMAND:
+                    case CLOSE_TESTING_ADMIN_COMMAND:
+                    case OPEN_TESTING_ADMIN_COMMAND:
+                    case DOWNLOAD_RESULTS_ADMIN_COMMAND:
+                    case DELETE_MYSELF_TEMPORARY_COMMAND:
+
                     default:
                         sendMessage(chatId, INVALID_COMMAND_ERROR, null);
                 }
@@ -184,7 +218,7 @@ public class RulesBot extends TelegramLongPollingBot {
                 if (needMore) {
                     sendQuestionMessage(stalkerByChatId, chatId);
                 } else {
-                    if (stalkerByChatId.getCurrentAnswers() < 2) {
+                    if (stalkerByChatId.getCurrentAnswers() < rightAnswers) {
                         stalkerByChatId.setState(FINISH_TEST);
                         sendBadTestingMessage(chatId);
                     } else {
@@ -198,7 +232,6 @@ public class RulesBot extends TelegramLongPollingBot {
                 }
             }
         }
-
     }
 
     private void sendAuthMessage(long chatId, StalkerEntity stalkerEntity) {
