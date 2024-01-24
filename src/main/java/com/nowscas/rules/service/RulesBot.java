@@ -35,6 +35,7 @@ import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScope
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import static com.nowscas.rules.util.Constants.ADMIN_HELP_TEXT;
 import static com.nowscas.rules.util.Constants.ALREADY_REGISTERED_RUS;
 import static com.nowscas.rules.util.Constants.BAD_TESTING_MESSAGE;
 import static com.nowscas.rules.util.Constants.CHOOSE_YOUR_GROUP_RUS;
@@ -160,7 +161,11 @@ public class RulesBot extends TelegramLongPollingBot {
                         }
                         break;
                     case HELP_COMMAND:
-                        sendMessage(chatId, HELP_TEXT, null);
+                        if (admins.contains(chatId)) {
+                            sendMessage(chatId, ADMIN_HELP_TEXT, null);
+                        } else {
+                            sendMessage(chatId, HELP_TEXT, null);
+                        }
                         break;
                     case MY_INFO_COMMAND:
                     case CLOSE_TESTING_ADMIN_COMMAND:
