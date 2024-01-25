@@ -37,10 +37,12 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import static com.nowscas.rules.util.Constants.ADMIN_HELP_TEXT;
 import static com.nowscas.rules.util.Constants.ALREADY_REGISTERED_RUS;
+import static com.nowscas.rules.util.Constants.BAD_STALKER_NAME_MESSAGE;
 import static com.nowscas.rules.util.Constants.BAD_TESTING_MESSAGE;
 import static com.nowscas.rules.util.Constants.CHOOSE_YOUR_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.CLOSE_TESTING_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.DELETE_MYSELF_TEMPORARY_COMMAND;
+import static com.nowscas.rules.util.Constants.DELETE_YOURSELF_MESSAGE;
 import static com.nowscas.rules.util.Constants.DOWNLOAD_RESULTS_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.FILE_PATH;
 import static com.nowscas.rules.util.Constants.FINISH_TEST;
@@ -51,6 +53,7 @@ import static com.nowscas.rules.util.Constants.INVALID_COMMAND_ERROR;
 import static com.nowscas.rules.util.Constants.INVALID_FILE_UPLOAD_ERROR;
 import static com.nowscas.rules.util.Constants.MY_INFO_BUTTON_TEXT;
 import static com.nowscas.rules.util.Constants.MY_INFO_COMMAND;
+import static com.nowscas.rules.util.Constants.NOT_REGISTERED_MESSAGE;
 import static com.nowscas.rules.util.Constants.OPEN_TESTING_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.QUESTIONS_NOT_EXIST;
 import static com.nowscas.rules.util.Constants.QUESTION_UPDATED;
@@ -59,7 +62,10 @@ import static com.nowscas.rules.util.Constants.REGISTER_EXIT_BUTTON;
 import static com.nowscas.rules.util.Constants.REGISTER_OFFER_RUS;
 import static com.nowscas.rules.util.Constants.REGISTER_SUCCESS_RUS;
 import static com.nowscas.rules.util.Constants.REGISTRATION_CONTINUES_MESSAGE;
+import static com.nowscas.rules.util.Constants.REGISTRATION_NOT_FINISHED_MESSAGE;
 import static com.nowscas.rules.util.Constants.RESULT;
+import static com.nowscas.rules.util.Constants.RULES_FAIL_INFO_RUS;
+import static com.nowscas.rules.util.Constants.RULES_SUCCESS_INFO_RUS;
 import static com.nowscas.rules.util.Constants.SEND_EDIT_MESSAGE_EXCEPTION;
 import static com.nowscas.rules.util.Constants.SEND_MESSAGE_EXCEPTION;
 import static com.nowscas.rules.util.Constants.SET_MENU_EXCEPTION;
@@ -134,6 +140,10 @@ public class RulesBot extends TelegramLongPollingBot {
                 try {
                     StalkerEntity stalkerByChatId = stalkerService.getStalkerByChatId(chatId);
                     if (STALKER_STATE_NEW.equals(stalkerByChatId.getState())) {
+                        if (messageText.startsWith("/")) {
+                            sendMessage(chatId, BAD_STALKER_NAME_MESSAGE, null);
+                            return;
+                        }
                         stalkerByChatId.setStalkerName(messageText);
                         stalkerByChatId.setState(STALKER_STATE_WAIT_FOR_GROUP);
                         stalkerService.saveStalker(stalkerByChatId);
@@ -168,11 +178,15 @@ public class RulesBot extends TelegramLongPollingBot {
                         }
                         break;
                     case MY_INFO_COMMAND:
+                        sendInfoMessage(chatId);
+                        break;
                     case CLOSE_TESTING_ADMIN_COMMAND:
                     case OPEN_TESTING_ADMIN_COMMAND:
                     case DOWNLOAD_RESULTS_ADMIN_COMMAND:
                     case DELETE_MYSELF_TEMPORARY_COMMAND:
-
+                        stalkerService.deleteByChatId(chatId);
+                        sendMessage(chatId, DELETE_YOURSELF_MESSAGE, null);
+                        break;
                     default:
                         sendMessage(chatId, INVALID_COMMAND_ERROR, null);
                 }
@@ -224,7 +238,7 @@ public class RulesBot extends TelegramLongPollingBot {
                     sendQuestionMessage(stalkerByChatId, chatId);
                 } else {
                     if (stalkerByChatId.getCurrentAnswers() < rightAnswers) {
-                        stalkerByChatId.setState(FINISH_TEST);
+                        stalkerByChatId.setState(STALKER_STATE_FILLED);
                         sendBadTestingMessage(chatId);
                     } else {
                         stalkerByChatId.setState(FINISH_TEST);
@@ -236,6 +250,27 @@ public class RulesBot extends TelegramLongPollingBot {
                     stalkerService.saveStalker(stalkerByChatId);
                 }
             }
+        }
+    }
+
+    private void sendInfoMessage(long chatId) {
+        try {
+            StalkerEntity stalkerEntity = stalkerService.getStalkerByChatId(chatId);
+            if (STALKER_STATE_WAIT_FOR_GROUP.equals(stalkerEntity.getState())) {
+                sendMessage(chatId, REGISTRATION_NOT_FINISHED_MESSAGE, null);
+                sendReceiveGroupMessage(chatId);
+            } else {
+                String message = String.format(ALREADY_REGISTERED_RUS, stalkerEntity.getStalkerName(), stalkerEntity.getGroupName());
+                String info;
+                if (FINISH_TEST.equals(stalkerEntity.getState())) {
+                    info = String.format(RULES_SUCCESS_INFO_RUS, stalkerEntity.getAttempts());
+                } else {
+                    info = String.format(RULES_FAIL_INFO_RUS, stalkerEntity.getAttempts());
+                }
+                sendMessage(chatId, message.concat(info), null);
+            }
+        } catch (StalkerException e) {
+            sendMessage(chatId, NOT_REGISTERED_MESSAGE, null);
         }
     }
 

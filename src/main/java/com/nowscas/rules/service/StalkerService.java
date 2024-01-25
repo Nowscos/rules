@@ -37,4 +37,8 @@ public class StalkerService {
         stalkerRepository.save(stalkerEntity);
     }
 
+    public void deleteByChatId(long chatId) {
+        stalkerRepository.delete(getStalkerByChatId(chatId));
+    }
+
 }
