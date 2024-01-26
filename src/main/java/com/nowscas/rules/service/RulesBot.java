@@ -51,6 +51,7 @@ import static com.nowscas.rules.util.Constants.HELP_COMMAND;
 import static com.nowscas.rules.util.Constants.HELP_TEXT;
 import static com.nowscas.rules.util.Constants.INVALID_COMMAND_ERROR;
 import static com.nowscas.rules.util.Constants.INVALID_FILE_UPLOAD_ERROR;
+import static com.nowscas.rules.util.Constants.LONG_STALKER_NAME_MESSAGE;
 import static com.nowscas.rules.util.Constants.MY_INFO_BUTTON_TEXT;
 import static com.nowscas.rules.util.Constants.MY_INFO_COMMAND;
 import static com.nowscas.rules.util.Constants.NOT_REGISTERED_MESSAGE;
@@ -135,6 +136,8 @@ public class RulesBot extends TelegramLongPollingBot {
                 } else {
                     sendMessage(chatId, INVALID_FILE_UPLOAD_ERROR, null);
                 }
+            } else if (update.getMessage().hasAnimation() || update.getMessage().hasPhoto() || update.getMessage().hasAudio()) {
+                sendMessage(chatId, INVALID_FILE_UPLOAD_ERROR, null);
             } else if (update.getMessage().hasText()) {
                 String messageText = update.getMessage().getText();
                 try {
@@ -142,6 +145,10 @@ public class RulesBot extends TelegramLongPollingBot {
                     if (STALKER_STATE_NEW.equals(stalkerByChatId.getState())) {
                         if (messageText.startsWith("/")) {
                             sendMessage(chatId, BAD_STALKER_NAME_MESSAGE, null);
+                            return;
+                        }
+                        if (messageText.length() > 30) {
+                            sendMessage(chatId, LONG_STALKER_NAME_MESSAGE, null);
                             return;
                         }
                         stalkerByChatId.setStalkerName(messageText);
@@ -191,7 +198,7 @@ public class RulesBot extends TelegramLongPollingBot {
                         sendMessage(chatId, INVALID_COMMAND_ERROR, null);
                 }
             }
-        } else if (update.hasCallbackQuery()) {
+            } else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             Chat chat = update.getCallbackQuery().getMessage().getChat();

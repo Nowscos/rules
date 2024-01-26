@@ -72,6 +72,7 @@ public final class Constants {
     public static final String SUCCESS_TESTING_MESSAGE = "Ты успешно сдал правила!";
     public static final String DELETE_YOURSELF_MESSAGE = "Вы успешно удалили свою запись";
 
+    public static final String LONG_STALKER_NAME_MESSAGE = "Позывной не может быть длиннее 30 символов. Введи корректный позывной";
     public static final String BAD_STALKER_NAME_MESSAGE = "Позывной не может начинаться с \'/\'";
     public static final String NOT_REGISTERED_MESSAGE = "Ты еще не зарегистрировался. Введи команду /start для регистрации";
     public static final String REGISTRATION_NOT_FINISHED_MESSAGE = "Ты не завершил регистрацию.";
