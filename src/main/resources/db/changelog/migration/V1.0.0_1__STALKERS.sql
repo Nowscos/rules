@@ -5,7 +5,7 @@ CREATE TABLE stalkers
     actual           BOOLEAN                  DEFAULT FALSE NOT NULL,
     created          TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
     updated          TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    user_name        VARCHAR(255)                           NOT NULL,
+    user_name        VARCHAR(255),
     stalker_name     VARCHAR(255),
     group_name       VARCHAR(255),
     state            VARCHAR(255),
