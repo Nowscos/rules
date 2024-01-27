@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nowscas.rules.model.AnswerEntity;
+import com.nowscas.rules.model.AnswerResponse;
 import com.nowscas.rules.model.QuestionDto;
 import com.nowscas.rules.model.QuestionEntity;
 import com.nowscas.rules.model.StalkerEntity;
@@ -22,9 +23,13 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+
+import static com.nowscas.rules.util.Constants.QUESTION_CALLBACK_TEXT;
+import static com.nowscas.rules.util.Constants.TESTING_START_RUS;
 
 @Service
 @RequiredArgsConstructor
@@ -83,14 +88,23 @@ public class QuestionService {
     }
 
     // Разбор ответа по вопросу
-    public boolean processAnswerMessage(CallbackQuery callbackQuery, StalkerEntity stalker) {
+    public AnswerResponse processAnswerMessage(CallbackQuery callbackQuery, StalkerEntity stalker, long chatId, int messageId) {
+        AnswerResponse answerResponse = new AnswerResponse();
         String callbackData = callbackQuery.getData();
         AnswerEntity answer = answerRepository.findByUuid(UUID.fromString(callbackData)).orElse(null);
         if (answer.getAnswer().equals(answer.getQuestion().getRightAnswer())) {
             stalker.setCurrentAnswers(stalker.getCurrentAnswers() + 1);
         }
         List<String> ids = Arrays.asList(stalker.getPassedQuestions());
-        return ids.size() < limitAnswers;
+
+        EditMessageText message = new EditMessageText();
+        message.setChatId(chatId);
+        message.setMessageId(messageId);
+        message.setText(String.format(QUESTION_CALLBACK_TEXT, answer.getQuestion().getQuestion(), answer.getAnswer()));
+
+        answerResponse.setNeedMore(ids.size() < limitAnswers);
+        answerResponse.setMessageText(message);
+        return answerResponse;
     }
 
     // Заполнение списка вопросов

@@ -64,11 +64,12 @@ public final class Constants {
     public static final String CHOOSE_YOUR_GROUP_RUS = "Выбери свою группировку";
     public static final String TESTING_OFFER_RUS = "Начнем сдачу правил?";
     public static final String TESTING_START_RUS = "Начнем!";
+    public static final String QUESTION_CALLBACK_TEXT = "%s\nВаш ответ: %s";
     public static final String TESTING_EXIT_RUS = "Ты отложил сдачу правил. Когда будешь готов напиши /start";
 
     public static final String QUESTION_UPDATED = "Список вопросов обновлен";
     public static final String QUESTIONS_NOT_EXIST = "Не найдено подходящих вопросов";
-    public static final String BAD_TESTING_MESSAGE = "Ты не прошел тестирование. Попробуй еще";
+    public static final String BAD_TESTING_MESSAGE = "Ты не прошел тестирование. Ошибок: %d. Попробуй еще";
     public static final String SUCCESS_TESTING_MESSAGE = "Ты успешно сдал правила!";
     public static final String DELETE_YOURSELF_MESSAGE = "Вы успешно удалили свою запись";
 

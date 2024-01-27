@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nowscas.rules.config.BotProperties;
 import com.nowscas.rules.exception.StalkerException;
+import com.nowscas.rules.model.AnswerResponse;
 import com.nowscas.rules.model.StalkerEntity;
 import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
@@ -90,8 +91,8 @@ public class RulesBot extends TelegramLongPollingBot {
 
     @Value("${app.bot.admins}")
     private List<Long> admins;
-    @Value("${app.bot.right-answers}")
-    private Integer rightAnswers;
+    @Value("${app.bot.limit-answers}")
+    private Integer limitAnswers;
 
     private final BotProperties botProperties;
     private final StalkerService stalkerService;
@@ -240,13 +241,14 @@ public class RulesBot extends TelegramLongPollingBot {
                     sendReceiveGroupMessage(chatId);
                 }
             } else if (TESTING.equals(stalkerByChatId.getState())) {
-                boolean needMore = questionService.processAnswerMessage(update.getCallbackQuery(), stalkerByChatId);
-                if (needMore) {
+                AnswerResponse answerResponse = questionService.processAnswerMessage(update.getCallbackQuery(), stalkerByChatId, chatId, messageId);
+                sendEditMessage(answerResponse.getMessageText(), chatId);
+                if (answerResponse.isNeedMore()) {
                     sendQuestionMessage(stalkerByChatId, chatId);
                 } else {
-                    if (stalkerByChatId.getCurrentAnswers() < rightAnswers) {
+                    if (stalkerByChatId.getCurrentAnswers() < limitAnswers) {
                         stalkerByChatId.setState(STALKER_STATE_FILLED);
-                        sendBadTestingMessage(chatId);
+                        sendBadTestingMessage(chatId, limitAnswers - stalkerByChatId.getCurrentAnswers());
                     } else {
                         stalkerByChatId.setState(FINISH_TEST);
                         sendSuccessTestingMessage(chatId);
@@ -292,8 +294,9 @@ public class RulesBot extends TelegramLongPollingBot {
         sendMessage(chatId, SUCCESS_TESTING_MESSAGE, null);
     }
 
-    private void sendBadTestingMessage(long chatId) {
-        sendMessage(chatId, BAD_TESTING_MESSAGE, null);
+    private void sendBadTestingMessage(long chatId, int errors) {
+        String answer = String.format(BAD_TESTING_MESSAGE, errors);
+        sendMessage(chatId, answer, null);
         InlineKeyboardMarkup inlineKeyboardMarkup = rulesService.prepareTestingMarkup();
         sendMessage(chatId, TESTING_OFFER_RUS, inlineKeyboardMarkup);
     }
