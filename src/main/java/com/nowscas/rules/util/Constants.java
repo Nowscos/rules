@@ -17,6 +17,7 @@ public final class Constants {
     public static final String STALKER_STATE_NEW = "NEW";
     public static final String STALKER_STATE_WAIT_FOR_GROUP = "WAIT_FOR_GROUP";
     public static final String STALKER_STATE_FILLED = "FILLED";
+    public static final String STALKER_STATE_PREPARE_TO_TEST = "PREPARE_TO_TEST";
     public static final String TESTING = "TESTING";
     public static final String FINISH_TEST = "FINISH_TEST";
 
@@ -54,6 +55,7 @@ public final class Constants {
     public static final String START_TESTING_RUS = "Начать тестирование";
     public static final String LATER_RUS = "Позже";
     public static final String REGISTER_SUCCESS_RUS = "Регистрация успешно завершена";
+    public static final String START_TESTING_TEXT_RUS = "Для начала тестирования веди команду /start";
     public static final String NOT_VALID_GROUP_RUS = "Указана некорректная группировка";
     public static final String START_REGISTRATION_RUS = "Начинаем регистрацию\n\nВведи свой позывной";
     public static final String EXIT_REGISTRATION_RUS = "Ты отказался от регистрации";
@@ -66,6 +68,7 @@ public final class Constants {
     public static final String TESTING_START_RUS = "Начнем!";
     public static final String QUESTION_CALLBACK_TEXT = "%s\nВаш ответ: %s";
     public static final String TESTING_EXIT_RUS = "Ты отложил сдачу правил. Когда будешь готов напиши /start";
+    public static final String DO_NOT_ANSWER_START = "Ответь на вопрос в блоке выше";
 
     public static final String QUESTION_UPDATED = "Список вопросов обновлен";
     public static final String QUESTIONS_NOT_EXIST = "Не найдено подходящих вопросов";
@@ -79,9 +82,9 @@ public final class Constants {
     public static final String TESTING_END = "Сдача правил на предстоящую игру закрывается!";
 
     public static final String LONG_STALKER_NAME_MESSAGE = "Позывной не может быть длиннее 30 символов. Введи корректный позывной";
-    public static final String BAD_STALKER_NAME_MESSAGE = "Позывной не может начинаться с \'/\'";
+    public static final String BAD_STALKER_NAME_MESSAGE = "Позывной не может начинаться с \'/\'\nВведи корректный позывной";
     public static final String NOT_REGISTERED_MESSAGE = "Ты еще не зарегистрировался. Введи команду /start для регистрации";
-    public static final String REGISTRATION_NOT_FINISHED_MESSAGE = "Ты не завершил регистрацию.";
+    public static final String REGISTRATION_NOT_FINISHED_MESSAGE = "Ты не завершил регистрацию. Выбери одну из вышеуказанных группировок";
     public static final String REGISTRATION_CONTINUES_MESSAGE = "Ты уже начал регистрацию! Выбери группировку";
     public static final String TESTING_IS_FINISHED_MESSAGE = "Ты уже сдал правила для предстоящей игры!";
     public static final String TESTING_IS_RUNNING = "Ты уже в процессе тестирования! Заверши его";
@@ -109,7 +112,7 @@ public final class Constants {
             "/start для регистрации и тестирования\n" +
             "/help для просмотра доступых команд\n" +
             "/info для просмотра своих результатов\n" +
-            "/deleteMyself временная команда для удаления своей записи во время тестирования\n\n" +
+            "/deleteMyself временная команда для удаления своей записи во время тестирования\n" +
             "Команды администратора:\n" +
             "/closeTesting закрыть тестирование на предстоящую игру\n" +
             "/openTesting открыть регистрацию на следующую игру\n" +

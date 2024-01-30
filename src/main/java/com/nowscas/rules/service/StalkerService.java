@@ -46,4 +46,8 @@ public class StalkerService {
         stalkerRepository.delete(getStalkerByChatId(chatId));
     }
 
+    public void delete(StalkerEntity stalkerEntity) {
+        stalkerRepository.delete(stalkerEntity);
+    }
+
 }

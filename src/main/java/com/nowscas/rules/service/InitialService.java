@@ -59,23 +59,23 @@ public class InitialService {
 
     private final StalkerService stalkerService;
 
-    // Подготовка ответа на начало регистрации
-    public EditMessageText processContinueRegisterButton(Long chatId, Integer messageId) {
-        EditMessageText message = new EditMessageText();
-        message.setChatId(chatId);
-        message.setMessageId(messageId);
-        message.setText(START_REGISTRATION_RUS);
-        return message;
-    }
-
-    // Подготовка ответа на отказ от регистрации
-    public EditMessageText processExitRegisterButton(Long chatId, Integer messageId) {
-        EditMessageText message = new EditMessageText();
-        message.setChatId(chatId);
-        message.setMessageId(messageId);
-        message.setText(EXIT_REGISTRATION_RUS);
-        return message;
-    }
+//    // Подготовка ответа на начало регистрации
+//    public EditMessageText processContinueRegisterButton(Long chatId, Integer messageId) {
+//        EditMessageText message = new EditMessageText();
+//        message.setChatId(chatId);
+//        message.setMessageId(messageId);
+//        message.setText(START_REGISTRATION_RUS);
+//        return message;
+//    }
+//
+//    // Подготовка ответа на отказ от регистрации
+//    public EditMessageText processExitRegisterButton(Long chatId, Integer messageId) {
+//        EditMessageText message = new EditMessageText();
+//        message.setChatId(chatId);
+//        message.setMessageId(messageId);
+//        message.setText(EXIT_REGISTRATION_RUS);
+//        return message;
+//    }
 
     // Подготовка ответа на начало тестирования
     public EditMessageText processStartTestingButton(Long chatId, Integer messageId) {
@@ -241,7 +241,7 @@ public class InitialService {
 
     public void clearQuestionHistory(List<StalkerEntity> allStalkers) {
         for (StalkerEntity stalker : allStalkers) {
-            if (!STALKER_STATE_NEW.equals(stalker.getState()) || !STALKER_STATE_WAIT_FOR_GROUP.equals(stalker.getState())) {
+            if (!STALKER_STATE_NEW.equals(stalker.getState()) && !STALKER_STATE_WAIT_FOR_GROUP.equals(stalker.getState())) {
                 stalker.setState(STALKER_STATE_FILLED);
             }
             stalker.setAttempts(0);
