@@ -29,7 +29,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import static com.nowscas.rules.util.Constants.QUESTION_CALLBACK_TEXT;
-import static com.nowscas.rules.util.Constants.TESTING_START_RUS;
 
 @Service
 @RequiredArgsConstructor

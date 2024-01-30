@@ -22,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -45,6 +44,7 @@ import static com.nowscas.rules.util.Constants.CLOSE_TESTING_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.DELETE_MYSELF_TEMPORARY_COMMAND;
 import static com.nowscas.rules.util.Constants.DELETE_YOURSELF_MESSAGE;
 import static com.nowscas.rules.util.Constants.DOWNLOAD_RESULTS_ADMIN_COMMAND;
+import static com.nowscas.rules.util.Constants.ENTER;
 import static com.nowscas.rules.util.Constants.FILE_PATH;
 import static com.nowscas.rules.util.Constants.FINISH_TEST;
 import static com.nowscas.rules.util.Constants.HELP_BUTTON_TEXT;
@@ -79,10 +79,15 @@ import static com.nowscas.rules.util.Constants.START_COMMAND;
 import static com.nowscas.rules.util.Constants.SUCCESS_TESTING_MESSAGE;
 import static com.nowscas.rules.util.Constants.TESTING;
 import static com.nowscas.rules.util.Constants.TESTING_CONTINUE_BUTTON;
+import static com.nowscas.rules.util.Constants.TESTING_END;
 import static com.nowscas.rules.util.Constants.TESTING_EXIT_BUTTON;
 import static com.nowscas.rules.util.Constants.TESTING_IS_FINISHED_MESSAGE;
 import static com.nowscas.rules.util.Constants.TESTING_IS_RUNNING;
 import static com.nowscas.rules.util.Constants.TESTING_OFFER_RUS;
+import static com.nowscas.rules.util.Constants.TESTING_START;
+import static com.nowscas.rules.util.Constants.TEST_ALREADY_CLOSED_MESSAGE;
+import static com.nowscas.rules.util.Constants.TEST_ALREADY_OPENED_MESSAGE;
+import static com.nowscas.rules.util.Constants.TEST_DISABLE_MESSAGE;
 
 @Slf4j
 @Component
@@ -93,13 +98,14 @@ public class RulesBot extends TelegramLongPollingBot {
     private List<Long> admins;
     @Value("${app.bot.limit-answers}")
     private Integer limitAnswers;
+    @Value("${app.bot.test-enable}")
+    private boolean testEnable;
 
     private final BotProperties botProperties;
     private final StalkerService stalkerService;
-    private final InitialService rulesService;
+    private final InitialService initialService;
     private final QuestionService questionService;
     private final ObjectMapper objectMapper;
-    private final Environment environment;
 
     @Override
     public String getBotUsername() {
@@ -168,11 +174,19 @@ public class RulesBot extends TelegramLongPollingBot {
                             if (STALKER_STATE_WAIT_FOR_GROUP.equals(stalkerByChatId.getState())) {
                                 sendMessage(chatId, REGISTRATION_CONTINUES_MESSAGE, null);
                             } else if (STALKER_STATE_FILLED.equals(stalkerByChatId.getState())) {
-                                sendAuthMessage(chatId, stalkerByChatId);
+                                if (testEnable) {
+                                    sendAuthMessage(chatId, stalkerByChatId);
+                                } else {
+                                    sendMessage(chatId, TEST_DISABLE_MESSAGE, null);
+                                }
                             } else if (FINISH_TEST.equals(stalkerByChatId.getState())) {
                                 sendMessage(chatId, TESTING_IS_FINISHED_MESSAGE, null);
                             } else if (TESTING.equals(stalkerByChatId.getState())) {
-                                sendMessage(chatId, TESTING_IS_RUNNING, null);
+                                if (testEnable) {
+                                    sendMessage(chatId, TESTING_IS_RUNNING, null);
+                                } else {
+                                    sendMessage(chatId, TEST_DISABLE_MESSAGE, null);
+                                }
                             }
                         } catch (StalkerException e) {
                             sendRegisterMessage(chatId);
@@ -189,7 +203,31 @@ public class RulesBot extends TelegramLongPollingBot {
                         sendInfoMessage(chatId);
                         break;
                     case CLOSE_TESTING_ADMIN_COMMAND:
+                        if (!testEnable) {
+                            sendMessage(chatId, TEST_ALREADY_CLOSED_MESSAGE, null);
+                            return;
+                        }
+                        if (admins.contains(chatId)) {
+                            this.testEnable = false;
+                            notifyClosingTesting();
+                        } else {
+                            sendMessage(chatId, INVALID_COMMAND_ERROR, null);
+                        }
+                        break;
                     case OPEN_TESTING_ADMIN_COMMAND:
+                        if (testEnable) {
+                            sendMessage(chatId, TEST_ALREADY_OPENED_MESSAGE, null);
+                            return;
+                        }
+                        if (admins.contains(chatId)) {
+                            this.testEnable = true;
+                            List<StalkerEntity> allStalkers = stalkerService.getAllStalkers();
+                            initialService.clearQuestionHistory(allStalkers);
+                            notifyOpenTesting(allStalkers);
+                        } else {
+                            sendMessage(chatId, INVALID_COMMAND_ERROR, null);
+                        }
+                        break;
                     case DOWNLOAD_RESULTS_ADMIN_COMMAND:
                     case DELETE_MYSELF_TEMPORARY_COMMAND:
                         stalkerService.deleteByChatId(chatId);
@@ -199,7 +237,7 @@ public class RulesBot extends TelegramLongPollingBot {
                         sendMessage(chatId, INVALID_COMMAND_ERROR, null);
                 }
             }
-            } else if (update.hasCallbackQuery()) {
+        } else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
             Long chatId = update.getCallbackQuery().getMessage().getChatId();
             Chat chat = update.getCallbackQuery().getMessage().getChat();
@@ -207,56 +245,67 @@ public class RulesBot extends TelegramLongPollingBot {
 
             EditMessageText message;
             if (REGISTER_CONTINUE_BUTTON.equals(callbackData)) {
-                message = rulesService.processContinueRegisterButton(chatId, messageId);
+                message = initialService.processContinueRegisterButton(chatId, messageId);
                 stalkerService.saveNewStalker(chat);
                 sendEditMessage(message, chatId);
             }
             if (REGISTER_EXIT_BUTTON.equals(callbackData)) {
-                message = rulesService.processExitRegisterButton(chatId, messageId);
+                message = initialService.processExitRegisterButton(chatId, messageId);
                 sendEditMessage(message, chatId);
             }
 
             StalkerEntity stalkerByChatId = stalkerService.getStalkerByChatId(chatId);
             if (TESTING_CONTINUE_BUTTON.equals(callbackData)) {
-                message = rulesService.processStartTestingButton(chatId, messageId);
-                sendEditMessage(message, chatId);
-                stalkerByChatId.setState(TESTING);
-                stalkerService.saveStalker(stalkerByChatId);
+                if (testEnable) {
+                    message = initialService.processStartTestingButton(chatId, messageId);
+                    sendEditMessage(message, chatId);
+                    stalkerByChatId.setState(TESTING);
+                    stalkerService.saveStalker(stalkerByChatId);
 
-                sendQuestionMessage(stalkerByChatId, chatId);
+                    sendQuestionMessage(stalkerByChatId, chatId);
+                } else {
+                    message = initialService.processStartTestingButtonWhenTestingClosed(chatId, messageId);
+                    sendEditMessage(message, chatId);
+                }
+                return;
             }
             if (TESTING_EXIT_BUTTON.equals(callbackData)) {
-                message = rulesService.processExitTestingButton(chatId, messageId);
+                message = initialService.processExitTestingButton(chatId, messageId);
                 sendEditMessage(message, chatId);
+                return;
             }
 
             if (STALKER_STATE_WAIT_FOR_GROUP.equals(stalkerByChatId.getState())) {
-                message = rulesService.processGroupChoiceMessage(update.getCallbackQuery());
+                message = initialService.processGroupChoiceMessage(update.getCallbackQuery());
                 if (REGISTER_SUCCESS_RUS.equals(message.getText())) {
                     sendEditMessage(message, chatId);
-                    InlineKeyboardMarkup inlineKeyboardMarkup = rulesService.prepareTestingMarkup();
+                    InlineKeyboardMarkup inlineKeyboardMarkup = initialService.prepareTestingMarkup();
                     sendMessage(chatId, TESTING_OFFER_RUS, inlineKeyboardMarkup);
                 } else {
                     sendEditMessage(message, chatId);
                     sendReceiveGroupMessage(chatId);
                 }
             } else if (TESTING.equals(stalkerByChatId.getState())) {
-                AnswerResponse answerResponse = questionService.processAnswerMessage(update.getCallbackQuery(), stalkerByChatId, chatId, messageId);
-                sendEditMessage(answerResponse.getMessageText(), chatId);
-                if (answerResponse.isNeedMore()) {
-                    sendQuestionMessage(stalkerByChatId, chatId);
-                } else {
-                    if (stalkerByChatId.getCurrentAnswers() < limitAnswers) {
-                        stalkerByChatId.setState(STALKER_STATE_FILLED);
-                        sendBadTestingMessage(chatId, limitAnswers - stalkerByChatId.getCurrentAnswers());
+                if (testEnable) {
+                    AnswerResponse answerResponse = questionService.processAnswerMessage(update.getCallbackQuery(), stalkerByChatId, chatId, messageId);
+                    sendEditMessage(answerResponse.getMessageText(), chatId);
+                    if (answerResponse.isNeedMore()) {
+                        sendQuestionMessage(stalkerByChatId, chatId);
                     } else {
-                        stalkerByChatId.setState(FINISH_TEST);
-                        sendSuccessTestingMessage(chatId);
+                        if (stalkerByChatId.getCurrentAnswers() < limitAnswers) {
+                            stalkerByChatId.setState(STALKER_STATE_FILLED);
+                            sendBadTestingMessage(chatId, limitAnswers - stalkerByChatId.getCurrentAnswers());
+                        } else {
+                            stalkerByChatId.setState(FINISH_TEST);
+                            sendSuccessTestingMessage(chatId);
+                        }
+                        stalkerByChatId.setAttempts(stalkerByChatId.getAttempts() + 1);
+                        stalkerByChatId.setCurrentAnswers(0);
+                        stalkerByChatId.setPassedQuestions(null);
+                        stalkerService.saveStalker(stalkerByChatId);
                     }
-                    stalkerByChatId.setAttempts(stalkerByChatId.getAttempts() + 1);
-                    stalkerByChatId.setCurrentAnswers(0);
-                    stalkerByChatId.setPassedQuestions(null);
-                    stalkerService.saveStalker(stalkerByChatId);
+                } else {
+                    sendMessage(chatId, TEST_DISABLE_MESSAGE, null);
                 }
             }
         }
@@ -272,9 +321,9 @@ public class RulesBot extends TelegramLongPollingBot {
                 String message = String.format(ALREADY_REGISTERED_RUS, stalkerEntity.getStalkerName(), stalkerEntity.getGroupName());
                 String info;
                 if (FINISH_TEST.equals(stalkerEntity.getState())) {
-                    info = String.format(RULES_SUCCESS_INFO_RUS, stalkerEntity.getAttempts());
+                    info = String.format(ENTER + RULES_SUCCESS_INFO_RUS, stalkerEntity.getAttempts());
                 } else {
-                    info = String.format(RULES_FAIL_INFO_RUS, stalkerEntity.getAttempts());
+                    info = String.format(ENTER + RULES_FAIL_INFO_RUS, stalkerEntity.getAttempts());
                 }
                 sendMessage(chatId, message.concat(info), null);
             }
@@ -286,7 +335,7 @@ public class RulesBot extends TelegramLongPollingBot {
     private void sendAuthMessage(long chatId, StalkerEntity stalkerEntity) {
         String answer = String.format(ALREADY_REGISTERED_RUS, stalkerEntity.getStalkerName(), stalkerEntity.getGroupName());
         sendMessage(chatId, answer, null);
-        InlineKeyboardMarkup inlineKeyboardMarkup = rulesService.prepareTestingMarkup();
+        InlineKeyboardMarkup inlineKeyboardMarkup = initialService.prepareTestingMarkup();
         sendMessage(chatId, TESTING_OFFER_RUS, inlineKeyboardMarkup);
     }
 
@@ -297,17 +346,17 @@ public class RulesBot extends TelegramLongPollingBot {
     private void sendBadTestingMessage(long chatId, int errors) {
         String answer = String.format(BAD_TESTING_MESSAGE, errors);
         sendMessage(chatId, answer, null);
-        InlineKeyboardMarkup inlineKeyboardMarkup = rulesService.prepareTestingMarkup();
+        InlineKeyboardMarkup inlineKeyboardMarkup = initialService.prepareTestingMarkup();
         sendMessage(chatId, TESTING_OFFER_RUS, inlineKeyboardMarkup);
     }
 
     private void sendRegisterMessage(long chatId) {
-        InlineKeyboardMarkup inlineKeyboardMarkup = rulesService.prepareRegisterMarkup();
+        InlineKeyboardMarkup inlineKeyboardMarkup = initialService.prepareRegisterMarkup();
         sendMessage(chatId, REGISTER_OFFER_RUS, inlineKeyboardMarkup);
     }
 
     private void sendReceiveGroupMessage(long chatId) {
-        InlineKeyboardMarkup inlineKeyboardMarkup = rulesService.prepareReceiveGroupMarkup();
+        InlineKeyboardMarkup inlineKeyboardMarkup = initialService.prepareReceiveGroupMarkup();
         sendMessage(chatId, CHOOSE_YOUR_GROUP_RUS, inlineKeyboardMarkup);
     }
 
@@ -367,5 +416,25 @@ public class RulesBot extends TelegramLongPollingBot {
         String questionsJsonString = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         questionService.fillQuestions(questionsJsonString);
         sendMessage(chatId, QUESTION_UPDATED, null);
+    }
+
+    private void notifyOpenTesting(List<StalkerEntity> allStalkers) {
+        for (StalkerEntity stalker : allStalkers) {
+            sendMessage(stalker.getChatId(), TESTING_START, null);
+        }
+    }
+
+    private void notifyClosingTesting() {
+        List<StalkerEntity> allStalkers = stalkerService.getAllStalkers();
+        for (StalkerEntity stalker : allStalkers) {
+            String info;
+            sendMessage(stalker.getChatId(), TESTING_END, null);
+            if (FINISH_TEST.equals(stalker.getState())) {
+                info = String.format(RULES_SUCCESS_INFO_RUS, stalker.getAttempts());
+            } else {
+                info = String.format(RULES_FAIL_INFO_RUS, stalker.getAttempts());
+            }
+            sendMessage(stalker.getChatId(), info, null);
+        }
     }
 }

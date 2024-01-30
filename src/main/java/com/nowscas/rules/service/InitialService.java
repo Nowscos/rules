@@ -38,6 +38,8 @@ import static com.nowscas.rules.util.Constants.SINGLES_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.SOP_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.SOP_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_FILLED;
+import static com.nowscas.rules.util.Constants.STALKER_STATE_NEW;
+import static com.nowscas.rules.util.Constants.STALKER_STATE_WAIT_FOR_GROUP;
 import static com.nowscas.rules.util.Constants.START_REGISTRATION_RUS;
 import static com.nowscas.rules.util.Constants.START_TESTING_RUS;
 import static com.nowscas.rules.util.Constants.TECH_GROUP_BUTTON;
@@ -46,6 +48,7 @@ import static com.nowscas.rules.util.Constants.TESTING_CONTINUE_BUTTON;
 import static com.nowscas.rules.util.Constants.TESTING_EXIT_BUTTON;
 import static com.nowscas.rules.util.Constants.TESTING_EXIT_RUS;
 import static com.nowscas.rules.util.Constants.TESTING_START_RUS;
+import static com.nowscas.rules.util.Constants.TEST_DISABLE_MESSAGE;
 import static com.nowscas.rules.util.Constants.UN_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.UN_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.getGroupsNameMap;
@@ -80,6 +83,15 @@ public class InitialService {
         message.setChatId(chatId);
         message.setMessageId(messageId);
         message.setText(TESTING_START_RUS);
+        return message;
+    }
+
+    // Подготовка ответа на начало тестирования когда тестирование закрыто
+    public EditMessageText processStartTestingButtonWhenTestingClosed(Long chatId, Integer messageId) {
+        EditMessageText message = new EditMessageText();
+        message.setChatId(chatId);
+        message.setMessageId(messageId);
+        message.setText(TEST_DISABLE_MESSAGE);
         return message;
     }
 
@@ -225,5 +237,17 @@ public class InitialService {
         inlineKeyboardMarkup.setKeyboard(inlineRows);
 
         return inlineKeyboardMarkup;
+    }
+
+    public void clearQuestionHistory(List<StalkerEntity> allStalkers) {
+        for (StalkerEntity stalker : allStalkers) {
+            if (!STALKER_STATE_NEW.equals(stalker.getState()) || !STALKER_STATE_WAIT_FOR_GROUP.equals(stalker.getState())) {
+                stalker.setState(STALKER_STATE_FILLED);
+            }
+            stalker.setAttempts(0);
+            stalker.setCurrentAnswers(0);
+            stalker.setPassedQuestions(null);
+            stalkerService.saveStalker(stalker);
+        }
     }
 }

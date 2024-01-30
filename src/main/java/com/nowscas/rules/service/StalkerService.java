@@ -2,6 +2,7 @@ package com.nowscas.rules.service;
 
 import com.nowscas.rules.model.StalkerEntity;
 import com.nowscas.rules.repository.StalkerRepository;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,10 @@ import static com.nowscas.rules.util.Constants.STALKER_STATE_NEW;
 public class StalkerService {
 
     private final StalkerRepository stalkerRepository;
+
+    public List<StalkerEntity> getAllStalkers() {
+        return stalkerRepository.findAll();
+    }
 
     public void saveNewStalker(Chat chat) {
         StalkerEntity newEntity = StalkerEntity.builder()

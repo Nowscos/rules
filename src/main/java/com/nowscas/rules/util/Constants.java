@@ -58,8 +58,8 @@ public final class Constants {
     public static final String START_REGISTRATION_RUS = "Начинаем регистрацию\n\nВведи свой позывной";
     public static final String EXIT_REGISTRATION_RUS = "Ты отказался от регистрации";
     public static final String ALREADY_REGISTERED_RUS = "Привет, сталкер! Ты зарегистрирован под позывным %s в группировке %s";
-    public static final String RULES_SUCCESS_INFO_RUS = "\nТы успешно сдал правила. Попыток: %s";
-    public static final String RULES_FAIL_INFO_RUS = "\nТы еще не сдал правила. Попыток: %s";
+    public static final String RULES_SUCCESS_INFO_RUS = "Ты успешно сдал правила. Попыток: %s";
+    public static final String RULES_FAIL_INFO_RUS = "Ты еще не сдал правила. Попыток: %s";
     public static final String REGISTER_OFFER_RUS = "Привет, сталкер! Ты еще не зарегистрирован. Продолжить?";
     public static final String CHOOSE_YOUR_GROUP_RUS = "Выбери свою группировку";
     public static final String TESTING_OFFER_RUS = "Начнем сдачу правил?";
@@ -72,6 +72,11 @@ public final class Constants {
     public static final String BAD_TESTING_MESSAGE = "Ты не прошел тестирование. Ошибок: %d. Попробуй еще";
     public static final String SUCCESS_TESTING_MESSAGE = "Ты успешно сдал правила!";
     public static final String DELETE_YOURSELF_MESSAGE = "Вы успешно удалили свою запись";
+    public static final String TEST_DISABLE_MESSAGE = "Сдача правил временно закрыта. Ожидайте уведомления";
+    public static final String TEST_ALREADY_OPENED_MESSAGE = "Сдача правил уже открыта";
+    public static final String TEST_ALREADY_CLOSED_MESSAGE = "Сдача правил уже закрыта";
+    public static final String TESTING_START = "Сдача правил на предстоящую игру открыта! Удачи!\nВведи команду /start";
+    public static final String TESTING_END = "Сдача правил на предстоящую игру закрывается!";
 
     public static final String LONG_STALKER_NAME_MESSAGE = "Позывной не может быть длиннее 30 символов. Введи корректный позывной";
     public static final String BAD_STALKER_NAME_MESSAGE = "Позывной не может начинаться с \'/\'";
@@ -88,6 +93,7 @@ public final class Constants {
 
     public static final String RESULT = "result";
     public static final String FILE_PATH = "file_path";
+    public static final String ENTER = "\n";
 
     public static final String START_BUTTON_TEXT = "Начать работу";
     public static final String HELP_BUTTON_TEXT = "Помощь";
