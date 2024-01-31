@@ -17,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import static com.nowscas.rules.exception.StalkerException.notFound;
 import static com.nowscas.rules.util.Constants.ATTEMPTS;
 import static com.nowscas.rules.util.Constants.FINISH_TEST;
+import static com.nowscas.rules.util.Constants.NR;
 import static com.nowscas.rules.util.Constants.STALKER_GROUP_NAME;
 import static com.nowscas.rules.util.Constants.STALKER_NAME;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_NEW;
@@ -57,27 +58,24 @@ public class StalkerService {
         stalkerRepository.delete(getStalkerByChatId(chatId));
     }
 
-    public void delete(StalkerEntity stalkerEntity) {
-        stalkerRepository.delete(stalkerEntity);
-    }
-
     public SendDocument getResultFileSend(long chatId) throws IOException {
         List<StalkerEntity> allStalkers = getAllStalkers();
+        List<StalkerEntity> filtered = allStalkers.stream().filter(s -> FINISH_TEST.equals(s.getState())).toList();
         File tempFile = File.createTempFile("result", ".txt");
         BufferedWriter bw = new BufferedWriter(new FileWriter(tempFile, true));
+        bw.append(NR);
         bw.append(getColumnLine(STALKER_NAME, 31));
         bw.append(getColumnLine(STALKER_GROUP_NAME, 21));
         bw.append(getColumnLine(ATTEMPTS, 21));
         bw.append(TG_TAG);
         bw.append("\n");
-        for (StalkerEntity stalker : allStalkers) {
-            if (FINISH_TEST.equals(stalker.getState())) {
-                bw.append("\n");
-                bw.append(getColumnLine(stalker.getStalkerName(), 31));
-                bw.append(getColumnLine(stalker.getGroupName(), 21));
-                bw.append(getColumnLine(String.valueOf(stalker.getAttempts()), 21));
-                bw.append(stalker.getUserName());
-            }
+        for (int i = 0; i < filtered.size(); i++) {
+            bw.append("\n");
+            bw.append(getColumnLine(String.valueOf(i + 1), 4));
+            bw.append(getColumnLine(filtered.get(i).getStalkerName(), 31));
+            bw.append(getColumnLine(filtered.get(i).getGroupName(), 21));
+            bw.append(getColumnLine(String.valueOf(filtered.get(i).getAttempts()), 21));
+            bw.append(filtered.get(i).getUserName());
         }
 
         bw.close();
@@ -91,11 +89,7 @@ public class StalkerService {
     }
 
     private String getColumnLine(String body, int spaceSize) {
-        StringBuilder space = new StringBuilder();
-        for (int i = 0; i < spaceSize - body.length(); i ++) {
-            space.append(" ");
-        }
-        return body + space.toString();
+        return body + " ".repeat(Math.max(0, spaceSize - body.length()));
     }
 
 }

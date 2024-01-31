@@ -89,6 +89,7 @@ public final class Constants {
     public static final String SEND_DELETE_MESSAGE_EXCEPTION = "Ошибка отправки Delete сообщения в чат: %d";
     public static final String SET_MENU_EXCEPTION = "Ошибка создания меню";
 
+    public static final String NR = "№   ";
     public static final String STALKER_NAME = "ПОЗЫВНОЙ";
     public static final String STALKER_GROUP_NAME = "ГРУППИРОВКА";
     public static final String ATTEMPTS = "ПОПЫТОК";
