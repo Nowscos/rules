@@ -12,6 +12,8 @@ CREATE TABLE stalkers
     first_name       VARCHAR(255)                           NOT NULL,
     last_name        VARCHAR(255),
     chat_id          BIGSERIAL                              NOT NULL,
+    message_text     VARCHAR(255),
+    last_message_id  INT,
     current_answers  INT,
     attempts         INT,
     passed_questions VARCHAR[],

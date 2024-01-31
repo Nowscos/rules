@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -15,11 +16,8 @@ import static com.nowscas.rules.util.Constants.BANDITS_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.BANDITS_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.BEGINNERS_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.BEGINNERS_GROUP_RUS;
-import static com.nowscas.rules.util.Constants.CANCEL_RUS;
-import static com.nowscas.rules.util.Constants.CONTINUE_RUS;
 import static com.nowscas.rules.util.Constants.DUTY_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.DUTY_GROUP_RUS;
-import static com.nowscas.rules.util.Constants.EXIT_REGISTRATION_RUS;
 import static com.nowscas.rules.util.Constants.FREEDOM_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.FREEDOM_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.LATER_RUS;
@@ -30,8 +28,6 @@ import static com.nowscas.rules.util.Constants.MONOLITH_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.NEW_ZEL_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.NEW_ZEL_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.NOT_VALID_GROUP_RUS;
-import static com.nowscas.rules.util.Constants.REGISTER_CONTINUE_BUTTON;
-import static com.nowscas.rules.util.Constants.REGISTER_EXIT_BUTTON;
 import static com.nowscas.rules.util.Constants.REGISTER_SUCCESS_RUS;
 import static com.nowscas.rules.util.Constants.SINGLES_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.SINGLES_GROUP_RUS;
@@ -40,7 +36,6 @@ import static com.nowscas.rules.util.Constants.SOP_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_FILLED;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_NEW;
 import static com.nowscas.rules.util.Constants.STALKER_STATE_WAIT_FOR_GROUP;
-import static com.nowscas.rules.util.Constants.START_REGISTRATION_RUS;
 import static com.nowscas.rules.util.Constants.START_TESTING_RUS;
 import static com.nowscas.rules.util.Constants.TECH_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.TECH_GROUP_RUS;
@@ -58,24 +53,6 @@ import static com.nowscas.rules.util.Constants.getGroupsNameMap;
 public class InitialService {
 
     private final StalkerService stalkerService;
-
-//    // Подготовка ответа на начало регистрации
-//    public EditMessageText processContinueRegisterButton(Long chatId, Integer messageId) {
-//        EditMessageText message = new EditMessageText();
-//        message.setChatId(chatId);
-//        message.setMessageId(messageId);
-//        message.setText(START_REGISTRATION_RUS);
-//        return message;
-//    }
-//
-//    // Подготовка ответа на отказ от регистрации
-//    public EditMessageText processExitRegisterButton(Long chatId, Integer messageId) {
-//        EditMessageText message = new EditMessageText();
-//        message.setChatId(chatId);
-//        message.setMessageId(messageId);
-//        message.setText(EXIT_REGISTRATION_RUS);
-//        return message;
-//    }
 
     // Подготовка ответа на начало тестирования
     public EditMessageText processStartTestingButton(Long chatId, Integer messageId) {
@@ -127,28 +104,6 @@ public class InitialService {
             message.setText(NOT_VALID_GROUP_RUS);
         }
         return message;
-    }
-
-    // Подготовка блока начала регистрации
-    public InlineKeyboardMarkup prepareRegisterMarkup() {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> inlineRows = new ArrayList<>();
-        List<InlineKeyboardButton> inlineRow = new ArrayList<>();
-
-        InlineKeyboardButton continueButton = new InlineKeyboardButton();
-        continueButton.setText(CONTINUE_RUS);
-        continueButton.setCallbackData(REGISTER_CONTINUE_BUTTON);
-
-        InlineKeyboardButton exitButton = new InlineKeyboardButton();
-        exitButton.setText(CANCEL_RUS);
-        exitButton.setCallbackData(REGISTER_EXIT_BUTTON);
-
-        inlineRow.add(continueButton);
-        inlineRow.add(exitButton);
-
-        inlineRows.add(inlineRow);
-        inlineKeyboardMarkup.setKeyboard(inlineRows);
-        return inlineKeyboardMarkup;
     }
 
     // Подготовка блока подтверждения начала опроса
@@ -239,15 +194,14 @@ public class InitialService {
         return inlineKeyboardMarkup;
     }
 
-    public void clearQuestionHistory(List<StalkerEntity> allStalkers) {
-        for (StalkerEntity stalker : allStalkers) {
-            if (!STALKER_STATE_NEW.equals(stalker.getState()) && !STALKER_STATE_WAIT_FOR_GROUP.equals(stalker.getState())) {
-                stalker.setState(STALKER_STATE_FILLED);
-            }
-            stalker.setAttempts(0);
-            stalker.setCurrentAnswers(0);
-            stalker.setPassedQuestions(null);
-            stalkerService.saveStalker(stalker);
+    public void clearQuestionHistory(StalkerEntity stalker) {
+        if (!STALKER_STATE_NEW.equals(stalker.getState()) && !STALKER_STATE_WAIT_FOR_GROUP.equals(stalker.getState())) {
+            stalker.setState(STALKER_STATE_FILLED);
         }
+        stalker.setAttempts(0);
+        stalker.setCurrentAnswers(0);
+        stalker.setPassedQuestions(null);
+        stalker.setLastMessageId(0);
+        stalkerService.saveStalker(stalker);
     }
 }

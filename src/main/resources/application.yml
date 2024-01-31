@@ -1,7 +1,7 @@
 app:
   bot:
     name: SszRulesBot
-    token: 6878454405:AAFFDLATLLdYPHlmXyeyzMuP0_wScRlxDGk
+    token: 6878454405:AAH6Mt6CaZ9-mXKE3bLD3oVQmEtRhaJP6MU
     admins: 782243896
     right-answers: 3
     limit-answers: 5

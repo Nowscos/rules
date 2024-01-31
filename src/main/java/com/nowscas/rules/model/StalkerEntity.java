@@ -49,6 +49,12 @@ public class StalkerEntity implements Serializable {
     @Column(name = "chat_id")
     private Long chatId;
 
+    @Column(name = "last_message_id")
+    private int lastMessageId;
+
+    @Column(name = "message_text")
+    private String messageText;
+
     @Column(name = "current_answers")
     private int currentAnswers;
 

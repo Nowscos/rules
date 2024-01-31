@@ -21,8 +21,6 @@ public final class Constants {
     public static final String TESTING = "TESTING";
     public static final String FINISH_TEST = "FINISH_TEST";
 
-    public static final String REGISTER_CONTINUE_BUTTON = "REGISTER_CONTINUE_BUTTON";
-    public static final String REGISTER_EXIT_BUTTON = "REGISTER_EXIT_BUTTON";
     public static final String TESTING_CONTINUE_BUTTON = "TESTING_CONTINUE_BUTTON";
     public static final String TESTING_EXIT_BUTTON = "TESTING_EXIT_BUTTON";
 
@@ -50,19 +48,15 @@ public final class Constants {
     public static final String SOP_GROUP_RUS = "СОП";
     public static final String TECH_GROUP_RUS = "Игротех";
 
-    public static final String CONTINUE_RUS = "Продолжить";
-    public static final String CANCEL_RUS = "Отмена";
     public static final String START_TESTING_RUS = "Начать тестирование";
     public static final String LATER_RUS = "Позже";
     public static final String REGISTER_SUCCESS_RUS = "Регистрация успешно завершена";
     public static final String START_TESTING_TEXT_RUS = "Для начала тестирования веди команду /start";
     public static final String NOT_VALID_GROUP_RUS = "Указана некорректная группировка";
     public static final String START_REGISTRATION_RUS = "Начинаем регистрацию\n\nВведи свой позывной";
-    public static final String EXIT_REGISTRATION_RUS = "Ты отказался от регистрации";
     public static final String ALREADY_REGISTERED_RUS = "Привет, сталкер! Ты зарегистрирован под позывным %s в группировке %s";
     public static final String RULES_SUCCESS_INFO_RUS = "Ты успешно сдал правила. Попыток: %s";
     public static final String RULES_FAIL_INFO_RUS = "Ты еще не сдал правила. Попыток: %s";
-    public static final String REGISTER_OFFER_RUS = "Привет, сталкер! Ты еще не зарегистрирован. Продолжить?";
     public static final String CHOOSE_YOUR_GROUP_RUS = "Выбери свою группировку";
     public static final String TESTING_OFFER_RUS = "Начнем сдачу правил?";
     public static final String TESTING_START_RUS = "Начнем!";
@@ -78,7 +72,7 @@ public final class Constants {
     public static final String TEST_DISABLE_MESSAGE = "Сдача правил временно закрыта. Ожидайте уведомления";
     public static final String TEST_ALREADY_OPENED_MESSAGE = "Сдача правил уже открыта";
     public static final String TEST_ALREADY_CLOSED_MESSAGE = "Сдача правил уже закрыта";
-    public static final String TESTING_START = "Сдача правил на предстоящую игру открыта! Удачи!\nВведи команду /start";
+    public static final String TESTING_START = "Сдача правил на предстоящую игру открыта!\nДля начала введи команду /start";
     public static final String TESTING_END = "Сдача правил на предстоящую игру закрывается!";
 
     public static final String LONG_STALKER_NAME_MESSAGE = "Позывной не может быть длиннее 30 символов. Введи корректный позывной";
@@ -92,6 +86,7 @@ public final class Constants {
     public static final String INVALID_FILE_UPLOAD_ERROR = "Отправка файлов не поддерживается!";
     public static final String SEND_MESSAGE_EXCEPTION = "Ошибка отправки сообщения в чат: %d";
     public static final String SEND_EDIT_MESSAGE_EXCEPTION = "Ошибка отправки Edit сообщения в чат: %d";
+    public static final String SEND_DELETE_MESSAGE_EXCEPTION = "Ошибка отправки Delete сообщения в чат: %d";
     public static final String SET_MENU_EXCEPTION = "Ошибка создания меню";
 
     public static final String RESULT = "result";
