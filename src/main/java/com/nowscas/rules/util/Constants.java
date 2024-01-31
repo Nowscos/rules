@@ -48,7 +48,7 @@ public final class Constants {
     public static final String SOP_GROUP_RUS = "СОП";
     public static final String TECH_GROUP_RUS = "Игротех";
 
-    public static final String START_TESTING_RUS = "Начать тестирование";
+    public static final String START_TESTING_RUS = "Начать";
     public static final String LATER_RUS = "Позже";
     public static final String REGISTER_SUCCESS_RUS = "Регистрация успешно завершена";
     public static final String START_TESTING_TEXT_RUS = "Для начала тестирования веди команду /start";
@@ -88,6 +88,11 @@ public final class Constants {
     public static final String SEND_EDIT_MESSAGE_EXCEPTION = "Ошибка отправки Edit сообщения в чат: %d";
     public static final String SEND_DELETE_MESSAGE_EXCEPTION = "Ошибка отправки Delete сообщения в чат: %d";
     public static final String SET_MENU_EXCEPTION = "Ошибка создания меню";
+
+    public static final String STALKER_NAME = "ПОЗЫВНОЙ";
+    public static final String STALKER_GROUP_NAME = "ГРУППИРОВКА";
+    public static final String ATTEMPTS = "ПОПЫТОК";
+    public static final String TG_TAG = "ТЕЛЕГРАМ ТЭГ";
 
     public static final String RESULT = "result";
     public static final String FILE_PATH = "file_path";

@@ -8,12 +8,15 @@ import com.nowscas.rules.model.AnswerResponse;
 import com.nowscas.rules.model.StalkerEntity;
 import jakarta.annotation.PostConstruct;
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +29,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -242,6 +247,13 @@ public class RulesBot extends TelegramLongPollingBot {
                         }
                         break;
                     case DOWNLOAD_RESULTS_ADMIN_COMMAND:
+                        if (admins.contains(chatId)) {
+                            SendDocument resultFileSend = stalkerService.getResultFileSend(chatId);
+                            execute(resultFileSend);
+                        } else {
+                            sendMessage(chatId, INVALID_COMMAND_ERROR, null);
+                        }
+                        break;
                     case DELETE_MYSELF_TEMPORARY_COMMAND:
                         stalkerService.deleteByChatId(chatId);
                         sendMessage(chatId, DELETE_YOURSELF_MESSAGE, null);
