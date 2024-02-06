@@ -32,15 +32,19 @@ public class StalkerDto implements Serializable {
 
     private Long chatId;
 
+    private int lastMessageId;
+
+    private String messageText;
+
     private Integer currentAnswers;
 
     private Integer attempts;
 
     private String[] passedQuestions;
 
-    private ZonedDateTime created;
+    private ZonedDateTime tested;
 
-    private ZonedDateTime updated;
+    private ZonedDateTime created;
 
     private boolean actual;
 

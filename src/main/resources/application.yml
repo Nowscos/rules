@@ -3,9 +3,9 @@ app:
     name: SszRulesBot
     token: 6878454405:AAH6Mt6CaZ9-mXKE3bLD3oVQmEtRhaJP6MU
     admins: 782243896
-    right-answers: 3
     limit-answers: 5
     test-enable: false
+    retest-seconds: 180
 
 spring:
   datasource:

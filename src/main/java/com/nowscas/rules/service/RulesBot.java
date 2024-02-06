@@ -14,6 +14,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -104,6 +106,8 @@ public class RulesBot extends TelegramLongPollingBot {
     private Integer limitAnswers;
     @Value("${app.bot.test-enable}")
     private boolean testEnable;
+    @Value("${app.bot.retest-seconds}")
+    private int retestSeconds;
 
     private final BotProperties botProperties;
     private final StalkerService stalkerService;
@@ -267,6 +271,21 @@ public class RulesBot extends TelegramLongPollingBot {
             StalkerEntity stalkerByChatId = stalkerService.getStalkerByChatId(chatId);
             if (TESTING_CONTINUE_BUTTON.equals(callbackData)) {
                 if (testEnable) {
+                    ZonedDateTime tested = stalkerByChatId.getTested();
+                    if (tested != null) {
+                        ZonedDateTime now = ZonedDateTime.now();
+                        Duration between = Duration.between(tested, now);
+                        long secondsBetween = between.getSeconds();
+                        if (secondsBetween <= retestSeconds) {
+                            long minutesToReady = retestSeconds - secondsBetween < 60 ? 1 : (retestSeconds - secondsBetween) / 60;
+                            message = initialService.processStartTestingButtonWithRetestTime(chatId, messageId, minutesToReady);
+
+                            stalkerByChatId.setState(STALKER_STATE_FILLED);
+                            stalkerService.saveStalker(stalkerByChatId);
+                            sendEditMessage(message, chatId);
+                            return;
+                        }
+                    }
                     message = initialService.processStartTestingButton(chatId, messageId);
                     sendEditMessage(message, chatId);
                     stalkerByChatId.setState(TESTING);
@@ -315,6 +334,7 @@ public class RulesBot extends TelegramLongPollingBot {
                         stalkerByChatId.setAttempts(stalkerByChatId.getAttempts() + 1);
                         stalkerByChatId.setCurrentAnswers(0);
                         stalkerByChatId.setPassedQuestions(null);
+                        stalkerByChatId.setTested(ZonedDateTime.now());
                         stalkerService.saveStalker(stalkerByChatId);
                     }
                 } else {

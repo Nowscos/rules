@@ -4,7 +4,7 @@ CREATE TABLE stalkers
     uuid             UUID                                   NOT NULL,
     actual           BOOLEAN                  DEFAULT FALSE NOT NULL,
     created          TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
-    updated          TIMESTAMP WITH TIME ZONE DEFAULT NOW() NOT NULL,
+    tested           TIMESTAMP WITH TIME ZONE,
     user_name        VARCHAR(255),
     stalker_name     VARCHAR(255),
     group_name       VARCHAR(255),

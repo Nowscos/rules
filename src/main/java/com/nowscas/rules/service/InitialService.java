@@ -45,6 +45,7 @@ import static com.nowscas.rules.util.Constants.TESTING_START_RUS;
 import static com.nowscas.rules.util.Constants.TEST_DISABLE_MESSAGE;
 import static com.nowscas.rules.util.Constants.UN_GROUP_BUTTON;
 import static com.nowscas.rules.util.Constants.UN_GROUP_RUS;
+import static com.nowscas.rules.util.Constants.WAIT_FOR_RETEST_RUS;
 import static com.nowscas.rules.util.Constants.getGroupsNameMap;
 
 @Service
@@ -52,6 +53,15 @@ import static com.nowscas.rules.util.Constants.getGroupsNameMap;
 public class InitialService {
 
     private final StalkerService stalkerService;
+
+    // Подготовка ответа на начало тестирования
+    public EditMessageText processStartTestingButtonWithRetestTime(Long chatId, Integer messageId, long retestMinutes) {
+        EditMessageText message = new EditMessageText();
+        message.setChatId(chatId);
+        message.setMessageId(messageId);
+        message.setText(String.format(WAIT_FOR_RETEST_RUS, retestMinutes));
+        return message;
+    }
 
     // Подготовка ответа на начало тестирования
     public EditMessageText processStartTestingButton(Long chatId, Integer messageId) {
@@ -201,6 +211,7 @@ public class InitialService {
         stalker.setCurrentAnswers(0);
         stalker.setPassedQuestions(null);
         stalker.setLastMessageId(0);
+        stalker.setTested(null);
         stalkerService.saveStalker(stalker);
     }
 }

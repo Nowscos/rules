@@ -16,7 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 @Getter
 @Setter
@@ -64,13 +63,12 @@ public class StalkerEntity implements Serializable {
     @Column(name = "passed_questions")
     private String[] passedQuestions;
 
+    @Column(name = "tested")
+    private ZonedDateTime tested;
+
     @CreationTimestamp
     @Column(name = "created", nullable = false)
     private ZonedDateTime created;
-
-    @UpdateTimestamp
-    @Column(name = "updated", nullable = false)
-    private ZonedDateTime updated;
 
     @Column(name = "actual", nullable = false)
     private boolean actual;
