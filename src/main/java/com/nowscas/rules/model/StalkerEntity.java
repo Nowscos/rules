@@ -54,6 +54,9 @@ public class StalkerEntity implements Serializable {
     @Column(name = "message_text")
     private String messageText;
 
+    @Column(name = "last_thread_name")
+    private String lastThreadName;
+
     @Column(name = "current_answers")
     private int currentAnswers;
 

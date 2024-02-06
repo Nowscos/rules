@@ -5,7 +5,8 @@ app:
     admins: 782243896
     limit-answers: 5
     test-enable: false
-    retest-seconds: 180
+    retest-seconds: 300
+    question-mills: 30000
 
 spring:
   datasource:

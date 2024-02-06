@@ -87,20 +87,23 @@ public class QuestionService {
     }
 
     // Разбор ответа по вопросу
-    public AnswerResponse processAnswerMessage(CallbackQuery callbackQuery, StalkerEntity stalker, long chatId, int messageId) {
+    public AnswerResponse processAnswerMessage(String callbackData, StalkerEntity stalker, long chatId, int messageId) {
         AnswerResponse answerResponse = new AnswerResponse();
-        String callbackData = callbackQuery.getData();
-        AnswerEntity answer = answerRepository.findByUuid(UUID.fromString(callbackData)).orElse(null);
-        if (answer.getAnswer().equals(answer.getQuestion().getRightAnswer())) {
-            stalker.setCurrentAnswers(stalker.getCurrentAnswers() + 1);
-        }
-        List<String> ids = Arrays.asList(stalker.getPassedQuestions());
-
         EditMessageText message = new EditMessageText();
-        message.setChatId(chatId);
-        message.setMessageId(messageId);
-        message.setText(String.format(QUESTION_CALLBACK_TEXT, answer.getQuestion().getQuestion(), answer.getAnswer()));
 
+        if (callbackData != null) {
+            AnswerEntity answer = answerRepository.findByUuid(UUID.fromString(callbackData)).orElse(null);
+            if (answer.getAnswer().equals(answer.getQuestion().getRightAnswer())) {
+                stalker.setCurrentAnswers(stalker.getCurrentAnswers() + 1);
+                stalkerRepository.save(stalker);
+            }
+
+            message.setChatId(chatId);
+            message.setMessageId(messageId);
+            message.setText(String.format(QUESTION_CALLBACK_TEXT, answer.getQuestion().getQuestion(), answer.getAnswer()));
+        }
+
+        List<String> ids = Arrays.asList(stalker.getPassedQuestions());
         answerResponse.setNeedMore(ids.size() < limitAnswers);
         answerResponse.setMessageText(message);
         return answerResponse;

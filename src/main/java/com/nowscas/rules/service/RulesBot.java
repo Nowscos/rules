@@ -94,6 +94,7 @@ import static com.nowscas.rules.util.Constants.TESTING_START;
 import static com.nowscas.rules.util.Constants.TEST_ALREADY_CLOSED_MESSAGE;
 import static com.nowscas.rules.util.Constants.TEST_ALREADY_OPENED_MESSAGE;
 import static com.nowscas.rules.util.Constants.TEST_DISABLE_MESSAGE;
+import static com.nowscas.rules.util.Constants.YOU_DID_NOT_ANSWER;
 
 @Slf4j
 @Component
@@ -108,6 +109,8 @@ public class RulesBot extends TelegramLongPollingBot {
     private boolean testEnable;
     @Value("${app.bot.retest-seconds}")
     private int retestSeconds;
+    @Value("${app.bot.question-mills}")
+    private long questionMills;
 
     private final BotProperties botProperties;
     private final StalkerService stalkerService;
@@ -291,7 +294,7 @@ public class RulesBot extends TelegramLongPollingBot {
                     stalkerByChatId.setState(TESTING);
                     stalkerService.saveStalker(stalkerByChatId);
 
-                    sendQuestionMessage(stalkerByChatId, chatId);
+                    askQuestion(stalkerByChatId, chatId);
                 } else {
                     message = initialService.processStartTestingButtonWhenTestingClosed(chatId, messageId);
                     stalkerByChatId.setState(STALKER_STATE_FILLED);
@@ -319,23 +322,14 @@ public class RulesBot extends TelegramLongPollingBot {
                 }
             } else if (TESTING.equals(stalkerByChatId.getState())) {
                 if (testEnable) {
-                    AnswerResponse answerResponse = questionService.processAnswerMessage(update.getCallbackQuery(), stalkerByChatId, chatId, messageId);
+                    AnswerResponse answerResponse =
+                            questionService.processAnswerMessage(update.getCallbackQuery().getData(), stalkerByChatId, chatId, messageId);
                     sendEditMessage(answerResponse.getMessageText(), chatId);
+                    deletePreviousThread(stalkerByChatId.getLastThreadName());
                     if (answerResponse.isNeedMore()) {
-                        sendQuestionMessage(stalkerByChatId, chatId);
+                        askQuestion(stalkerByChatId, chatId);
                     } else {
-                        if (stalkerByChatId.getCurrentAnswers() < limitAnswers) {
-                            stalkerByChatId.setState(STALKER_STATE_FILLED);
-                            sendBadTestingMessage(chatId, limitAnswers - stalkerByChatId.getCurrentAnswers(), stalkerByChatId);
-                        } else {
-                            stalkerByChatId.setState(FINISH_TEST);
-                            sendSuccessTestingMessage(chatId);
-                        }
-                        stalkerByChatId.setAttempts(stalkerByChatId.getAttempts() + 1);
-                        stalkerByChatId.setCurrentAnswers(0);
-                        stalkerByChatId.setPassedQuestions(null);
-                        stalkerByChatId.setTested(ZonedDateTime.now());
-                        stalkerService.saveStalker(stalkerByChatId);
+                        finishTest(stalkerByChatId, chatId);
                     }
                 } else {
                     sendMessage(chatId, TEST_DISABLE_MESSAGE, null);
@@ -398,7 +392,7 @@ public class RulesBot extends TelegramLongPollingBot {
         sendMessage(chatId, CHOOSE_YOUR_GROUP_RUS, inlineKeyboardMarkup);
     }
 
-    private void sendQuestionMessage(StalkerEntity stalkerByChatId, Long chatId) {
+    private Pair<String, Integer> sendQuestionMessage(StalkerEntity stalkerByChatId, Long chatId) {
         Pair<String, InlineKeyboardMarkup> question = questionService.prepareQuestionMarkup(stalkerByChatId);
         int messageId;
         if (question == null) {
@@ -408,6 +402,7 @@ public class RulesBot extends TelegramLongPollingBot {
         }
         stalkerByChatId.setLastMessageId(messageId);
         stalkerService.saveStalker(stalkerByChatId);
+        return Pair.of(question.getLeft(), messageId);
     }
 
     private int sendMessage(long chatId, String message, InlineKeyboardMarkup inlineKeyboardMarkup) {
@@ -489,5 +484,68 @@ public class RulesBot extends TelegramLongPollingBot {
             }
             sendMessage(stalker.getChatId(), info, null);
         }
+    }
+
+    private void deletePreviousThread(String threadName) {
+        if (threadName != null) {
+            Thread deletableThread = null;
+            for (Thread t : Thread.getAllStackTraces().keySet()) {
+                if (t.getName().equals(threadName)) {
+                    deletableThread = t;
+                    break;
+                }
+            }
+            if (deletableThread != null) {
+                deletableThread.interrupt();
+            }
+        }
+    }
+
+    private void askQuestion(StalkerEntity stalkerByChatId, long chatId) {
+        Pair<String, Integer> questionPair = sendQuestionMessage(stalkerByChatId, chatId);
+        Thread closeQuestionThread = first(chatId, questionPair.getRight(), questionPair.getLeft());
+        closeQuestionThread.start();
+
+        stalkerByChatId.setLastThreadName(closeQuestionThread.getName());
+        stalkerService.saveStalker(stalkerByChatId);
+    }
+
+    private void finishTest(StalkerEntity stalkerByChatId, long chatId) {
+        if (stalkerByChatId.getCurrentAnswers() < limitAnswers) {
+            stalkerByChatId.setState(STALKER_STATE_FILLED);
+            sendBadTestingMessage(chatId, limitAnswers - stalkerByChatId.getCurrentAnswers(), stalkerByChatId);
+        } else {
+            stalkerByChatId.setState(FINISH_TEST);
+            sendSuccessTestingMessage(chatId);
+        }
+        stalkerByChatId.setAttempts(stalkerByChatId.getAttempts() + 1);
+        stalkerByChatId.setCurrentAnswers(0);
+        stalkerByChatId.setPassedQuestions(null);
+        stalkerByChatId.setTested(ZonedDateTime.now());
+        stalkerService.saveStalker(stalkerByChatId);
+    }
+
+    private Thread first(long chatId, int messageId, String question) {
+        return new Thread(() -> {
+            try {
+                Thread.sleep(questionMills);
+            } catch (InterruptedException e) {
+                return;
+            }
+            EditMessageText message = new EditMessageText();
+            message.setChatId(chatId);
+            message.setMessageId(messageId);
+            message.setText(question + ENTER + YOU_DID_NOT_ANSWER);
+            sendEditMessage(message, chatId);
+
+            StalkerEntity stalkerByChatId = stalkerService.getStalkerByChatId(chatId);
+            AnswerResponse answerResponse =
+                    questionService.processAnswerMessage(null, stalkerByChatId, 0, 0);
+            if (answerResponse.isNeedMore()) {
+                askQuestion(stalkerByChatId, chatId);
+            } else {
+                finishTest(stalkerByChatId, chatId);
+            }
+        });
     }
 }

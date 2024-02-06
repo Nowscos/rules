@@ -36,6 +36,8 @@ public class StalkerDto implements Serializable {
 
     private String messageText;
 
+    private String lastThreadName;
+
     private Integer currentAnswers;
 
     private Integer attempts;

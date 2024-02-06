@@ -13,6 +13,7 @@ CREATE TABLE stalkers
     last_name        VARCHAR(255),
     chat_id          BIGSERIAL                              NOT NULL,
     message_text     VARCHAR(255),
+    last_thread_name VARCHAR(255),
     last_message_id  INT,
     current_answers  INT,
     attempts         INT,

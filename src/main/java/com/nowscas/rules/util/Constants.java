@@ -58,12 +58,13 @@ public final class Constants {
     public static final String RULES_SUCCESS_INFO_RUS = "Ты успешно сдал правила. Попыток: %s";
     public static final String RULES_FAIL_INFO_RUS = "Ты еще не сдал правила. Попыток: %s";
     public static final String CHOOSE_YOUR_GROUP_RUS = "Выбери свою группировку";
-    public static final String TESTING_OFFER_RUS = "Начнем сдачу правил?";
-    public static final String TESTING_START_RUS = "Начнем!";
+    public static final String TESTING_OFFER_RUS = "Начнем сдачу правил? На каждый вопрос дается 30 секунд. Не мешкай!";
+    public static final String TESTING_START_RUS = "Начнем. Помни, что на вопрос у тебе 30 секунд!";
     public static final String WAIT_FOR_RETEST_RUS = "Недавно ты уже неудачно сдал правила. Пойди подучи и возвращайся. Минут до открытия пересдачи: %d";
     public static final String QUESTION_CALLBACK_TEXT = "%s\nВаш ответ: %s";
     public static final String TESTING_EXIT_RUS = "Ты отложил сдачу правил. Когда будешь готов напиши /start";
     public static final String DO_NOT_ANSWER_START = "Ответь на вопрос в блоке выше";
+    public static final String YOU_DID_NOT_ANSWER = "Вы не ответили";
 
     public static final String QUESTION_UPDATED = "Список вопросов обновлен";
     public static final String QUESTIONS_NOT_EXIST = "Не найдено подходящих вопросов";

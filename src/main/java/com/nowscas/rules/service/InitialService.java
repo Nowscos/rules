@@ -212,6 +212,7 @@ public class InitialService {
         stalker.setPassedQuestions(null);
         stalker.setLastMessageId(0);
         stalker.setTested(null);
+        stalker.setLastThreadName(null);
         stalkerService.saveStalker(stalker);
     }
 }
