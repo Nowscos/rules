@@ -503,7 +503,7 @@ public class RulesBot extends TelegramLongPollingBot {
 
     private void askQuestion(StalkerEntity stalkerByChatId, long chatId) {
         Pair<String, Integer> questionPair = sendQuestionMessage(stalkerByChatId, chatId);
-        Thread closeQuestionThread = first(chatId, questionPair.getRight(), questionPair.getLeft());
+        Thread closeQuestionThread = closeQuestionThread(chatId, questionPair.getRight(), questionPair.getLeft());
         closeQuestionThread.start();
 
         stalkerByChatId.setLastThreadName(closeQuestionThread.getName());
@@ -521,11 +521,13 @@ public class RulesBot extends TelegramLongPollingBot {
         stalkerByChatId.setAttempts(stalkerByChatId.getAttempts() + 1);
         stalkerByChatId.setCurrentAnswers(0);
         stalkerByChatId.setPassedQuestions(null);
+        stalkerByChatId.setLastThreadName(null);
+        stalkerByChatId.setLastMessageId(0);
         stalkerByChatId.setTested(ZonedDateTime.now());
         stalkerService.saveStalker(stalkerByChatId);
     }
 
-    private Thread first(long chatId, int messageId, String question) {
+    private Thread closeQuestionThread(long chatId, int messageId, String question) {
         return new Thread(() -> {
             try {
                 Thread.sleep(questionMills);
