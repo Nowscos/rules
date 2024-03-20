@@ -50,6 +50,11 @@ public class StalkerService {
                 .orElseThrow(() -> notFound("Сталкер с chatId {0} не найден", chatId));
     }
 
+    public StalkerEntity getStalkerByStalkerName(String stalkerName) {
+        return stalkerRepository.findByStalkerName(stalkerName)
+                .orElseThrow(() -> notFound("Сталкер с позывным {0} не найден", stalkerName));
+    }
+
     public void saveStalker(StalkerEntity stalkerEntity) {
         stalkerRepository.save(stalkerEntity);
     }

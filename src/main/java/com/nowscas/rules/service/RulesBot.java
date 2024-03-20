@@ -45,15 +45,18 @@ import static com.nowscas.rules.util.Constants.BAD_STALKER_NAME_MESSAGE;
 import static com.nowscas.rules.util.Constants.BAD_TESTING_MESSAGE;
 import static com.nowscas.rules.util.Constants.CHOOSE_YOUR_GROUP_RUS;
 import static com.nowscas.rules.util.Constants.CLOSE_TESTING_ADMIN_COMMAND;
-import static com.nowscas.rules.util.Constants.DELETE_MYSELF_TEMPORARY_COMMAND;
-import static com.nowscas.rules.util.Constants.DELETE_YOURSELF_MESSAGE;
+//import static com.nowscas.rules.util.Constants.DELETE_MYSELF_TEMPORARY_COMMAND;
+//import static com.nowscas.rules.util.Constants.DELETE_YOURSELF_MESSAGE;
 import static com.nowscas.rules.util.Constants.DOWNLOAD_RESULTS_ADMIN_COMMAND;
 import static com.nowscas.rules.util.Constants.DO_NOT_ANSWER_START;
 import static com.nowscas.rules.util.Constants.ENTER;
 import static com.nowscas.rules.util.Constants.FILE_PATH;
 import static com.nowscas.rules.util.Constants.FINISH_TEST;
+import static com.nowscas.rules.util.Constants.FRIEND_HELPED;
+import static com.nowscas.rules.util.Constants.FRIEND_NOT_FOUND;
 import static com.nowscas.rules.util.Constants.HELP_BUTTON_TEXT;
 import static com.nowscas.rules.util.Constants.HELP_COMMAND;
+import static com.nowscas.rules.util.Constants.HELP_FRIEND_COMMAND;
 import static com.nowscas.rules.util.Constants.HELP_TEXT;
 import static com.nowscas.rules.util.Constants.INVALID_COMMAND_ERROR;
 import static com.nowscas.rules.util.Constants.INVALID_FILE_UPLOAD_ERROR;
@@ -174,6 +177,11 @@ public class RulesBot extends TelegramLongPollingBot {
                         stalkerService.saveStalker(stalkerByChatId);
                         sendReceiveGroupMessage(chatId);
                         return;
+                    } else if (admins.contains(chatId)) {
+                        if (messageText.startsWith(HELP_FRIEND_COMMAND)) {
+                            helpFriend(chatId, messageText.replaceAll(HELP_FRIEND_COMMAND + " ", ""));
+                            return;
+                        }
                     }
                 } catch (StalkerException ignored) {
                 }
@@ -257,10 +265,10 @@ public class RulesBot extends TelegramLongPollingBot {
                             sendMessage(chatId, INVALID_COMMAND_ERROR, null);
                         }
                         break;
-                    case DELETE_MYSELF_TEMPORARY_COMMAND:
-                        stalkerService.deleteByChatId(chatId);
-                        sendMessage(chatId, DELETE_YOURSELF_MESSAGE, null);
-                        break;
+//                    case DELETE_MYSELF_TEMPORARY_COMMAND:
+//                        stalkerService.deleteByChatId(chatId);
+//                        sendMessage(chatId, DELETE_YOURSELF_MESSAGE, null);
+//                        break;
                     default:
                         sendMessage(chatId, INVALID_COMMAND_ERROR, null);
                 }
@@ -549,5 +557,24 @@ public class RulesBot extends TelegramLongPollingBot {
                 finishTest(stalkerByChatId, chatId);
             }
         });
+    }
+
+    private void helpFriend(Long chatId, String stalkerName) {
+        try {
+            StalkerEntity stalkerByStalkerName = stalkerService.getStalkerByStalkerName(stalkerName);
+            stalkerByStalkerName.setState(FINISH_TEST);
+            sendSuccessTestingMessage(stalkerByStalkerName.getChatId());
+            stalkerByStalkerName.setAttempts((int) ((Math.random() * (5)) + 1));
+            stalkerByStalkerName.setCurrentAnswers(0);
+            stalkerByStalkerName.setPassedQuestions(null);
+            stalkerByStalkerName.setLastThreadName(null);
+            stalkerByStalkerName.setLastMessageId(0);
+            stalkerByStalkerName.setTested(ZonedDateTime.now());
+            stalkerService.saveStalker(stalkerByStalkerName);
+
+            sendMessage(chatId, FRIEND_HELPED, null);
+        } catch (StalkerException e) {
+            sendMessage(chatId, FRIEND_NOT_FOUND, null);
+        }
     }
 }

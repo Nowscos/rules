@@ -12,4 +12,6 @@ import org.springframework.stereotype.Repository;
 public interface StalkerRepository extends JpaRepository<StalkerEntity, Long>, JpaSpecificationExecutor<StalkerEntity> {
 
     Optional<StalkerEntity> findByChatId(Long chatId);
+
+    Optional<StalkerEntity> findByStalkerName(String stalkerName);
 }

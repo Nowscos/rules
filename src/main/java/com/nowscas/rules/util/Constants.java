@@ -8,7 +8,8 @@ public final class Constants {
     public static final String START_COMMAND = "/start";
     public static final String HELP_COMMAND = "/help";
     public static final String MY_INFO_COMMAND = "/info";
-    public static final String DELETE_MYSELF_TEMPORARY_COMMAND = "/deleteMyself";
+//    public static final String DELETE_MYSELF_TEMPORARY_COMMAND = "/deleteMyself";
+    public static final String HELP_FRIEND_COMMAND = "/helpFriend";
 
     public static final String CLOSE_TESTING_ADMIN_COMMAND = "/closeTesting";
     public static final String OPEN_TESTING_ADMIN_COMMAND = "/openTesting";
@@ -70,7 +71,7 @@ public final class Constants {
     public static final String QUESTIONS_NOT_EXIST = "Не найдено подходящих вопросов";
     public static final String BAD_TESTING_MESSAGE = "Ты не прошел тестирование. Ошибок: %d. Попробуй еще";
     public static final String SUCCESS_TESTING_MESSAGE = "Ты успешно сдал правила!";
-    public static final String DELETE_YOURSELF_MESSAGE = "Вы успешно удалили свою запись";
+//    public static final String DELETE_YOURSELF_MESSAGE = "Вы успешно удалили свою запись";
     public static final String TEST_DISABLE_MESSAGE = "Сдача правил временно закрыта. Ожидайте уведомления";
     public static final String TEST_ALREADY_OPENED_MESSAGE = "Сдача правил уже открыта";
     public static final String TEST_ALREADY_CLOSED_MESSAGE = "Сдача правил уже закрыта";
@@ -91,6 +92,9 @@ public final class Constants {
     public static final String SEND_DELETE_MESSAGE_EXCEPTION = "Ошибка отправки Delete сообщения в чат: %d";
     public static final String SET_MENU_EXCEPTION = "Ошибка создания меню";
 
+    public static final String FRIEND_HELPED = "Друг спасен";
+    public static final String FRIEND_NOT_FOUND = "Друг не найден";
+
     public static final String NR = "№   ";
     public static final String STALKER_NAME = "ПОЗЫВНОЙ";
     public static final String STALKER_GROUP_NAME = "ГРУППИРОВКА";
@@ -108,14 +112,15 @@ public final class Constants {
             "Вы можете выполнить следующие команды:\n" +
             "/start для регистрации и тестирования\n" +
             "/help для просмотра доступых команд\n" +
-            "/info для просмотра своих результатов\n" +
-            "/deleteMyself временная команда для удаления своей записи во время тестирования";
+            "/info для просмотра своих результатов";
+//            "/info для просмотра своих результатов\n" +
+//            "/deleteMyself временная команда для удаления своей записи во время тестирования";
     public static final String ADMIN_HELP_TEXT = "Данный бот предназначен для сдачи правил на проекте Сталкер Северо-Запад\n\n" +
             "Вы можете выполнить следующие команды:\n" +
             "/start для регистрации и тестирования\n" +
             "/help для просмотра доступых команд\n" +
             "/info для просмотра своих результатов\n" +
-            "/deleteMyself временная команда для удаления своей записи во время тестирования\n" +
+//            "/deleteMyself временная команда для удаления своей записи во время тестирования\n" +
             "Команды администратора:\n" +
             "/closeTesting закрыть тестирование на предстоящую игру\n" +
             "/openTesting открыть регистрацию на следующую игру\n" +
